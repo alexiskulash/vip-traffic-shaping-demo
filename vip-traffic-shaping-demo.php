@@ -22,7 +22,7 @@ class VIP_Traffic_Shaping_Demo {
 		static $instance = false;
 
 		if ( ! $instance ) {
-			$instance = new VIP_Jetpack_Sync_Cron;
+			$instance = new VIP_Traffic_Shaping_Demo;
 		}
 
 		return $instance;
