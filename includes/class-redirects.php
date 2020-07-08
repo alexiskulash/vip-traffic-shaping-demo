@@ -17,10 +17,6 @@ class Redirects {
 		if ( ! class_exists( 'QM_Collectors' ) ) {
 			return;
 		}
-
-		//require_once VIP_TS_DEMO_PATH . '/includes/class-redirects-collector.php';
-		//require_once VIP_TS_DEMO_PATH . '/includes/class-redirects-dispatcher.php';
-		//require_once VIP_TS_DEMO_PATH . '/includes/class-redirects-output.php';
 	
 		add_filter(
 			'qm/outputter/html',
