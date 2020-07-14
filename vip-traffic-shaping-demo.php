@@ -1,41 +1,44 @@
 <?php
-
-/*
- * Plugin Name: VIP Traffic Shaping Demo
- * Description: This plugin demonstrates various mechanisms for configuring traffic on the VIP Go platform.
- * Version: 1.0
- * Author: Alexis Kulash, Matt Perry, Automattic
+/**
+ * VIP Traffic Shaping Demo
+ *
+ * @wordpress-plugin
+ * Plugin Name:       VIP Traffic Shaping Demo
+ * Description:       A plugin to demonstrate traffic shaping on the VIP Go platform
+ * Version:           1.0.0
+ * Author:            Alexis Kulash, Matt Perry, Automattic
  */
 
-if ( class_exists( 'VIP_Traffic_Shaping_Demo' ) ) {
-	return;
+// Do not allow direct access to this file.
+if ( ! defined( 'WPINC' ) ) {
+	die;
 }
 
-class VIP_Traffic_Shaping_Demo {
+define( 'VIP_TS_DEMO_PATH', plugin_dir_path( __FILE__ ) );
+define( 'VIP_TS_DEMO_URL', plugin_dir_url( __FILE__ ) );
+define( 'VIP_TS_DEMO_BASENAME', plugin_basename( __FILE__ ) );
+define( 'VIP_TS_DEMO_VERSION', '1.0.0' );
 
-	/**
-	 * Initiate an instance of this class if one doesn't exist already.
-	 *
-	 * @return VIP_Traffic_Shaping_Demo instance
-	 */
-	static public function init() {
-		static $instance = false;
+add_action( 'plugins_loaded', 'vip_ts_demo_require', 5 ); 
+function vip_ts_demo_require() {
 
-		if ( ! $instance ) {
-			$instance = new VIP_Traffic_Shaping_Demo;
-		}
-
-		return $instance;
+	if ( class_exists( 'QM_Collectors' ) ) {
+		include VIP_TS_DEMO_PATH . '/classes/QM_Collector_VIPRedirects.class.php';
+		QM_Collectors::add( new QM_Collector_VIPRedirects() );
 	}
 
-	/**
-	 * Class constructor for hooking actions/filters.
-	 *
-	 * @return void
-	 */
-	public function __construct() {
-		// Do stuff here
-	}
+	add_filter(
+		'qm/outputter/html',
+		function( array $output, QM_Collectors $collectors ) {
+			include VIP_TS_DEMO_PATH . '/classes/QM_Output_VIPRedirects.class.php';
+			$collector = QM_Collectors::get( 'vip-redirects' );
+			if ( $collector ) {
+				$output['vip-redirects'] = new QM_Output_VIPRedirects( $collector );
+			}
+			return $output;
+		},
+		50,
+		2
+	);
 }
 
-add_action( 'init', [ 'VIP_Traffic_Shaping_Demo', 'init' ] );
