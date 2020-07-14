@@ -19,16 +19,26 @@ define( 'VIP_TS_DEMO_URL', plugin_dir_url( __FILE__ ) );
 define( 'VIP_TS_DEMO_BASENAME', plugin_basename( __FILE__ ) );
 define( 'VIP_TS_DEMO_VERSION', '1.0.0' );
 
-// Dashboard-specific hooks, file includes.
-require_once VIP_TS_DEMO_PATH . 'includes/class-redirects.php';
+add_action( 'plugins_loaded', 'vip_ts_demo_require', 5 ); 
+function vip_ts_demo_require() {
 
-/**
- * Begin execution of the plugin.
- *
- * @access public
- * @return void
- */
-function run_vip_ts_demo() {
-	$plugin = new Redirects();
+	if ( class_exists( 'QM_Collectors' ) ) {
+		include VIP_TS_DEMO_PATH . '/classes/QM_Collector_VIPRedirects.class.php';
+		QM_Collectors::add( new QM_Collector_VIPRedirects() );
+	}
+
+	add_filter(
+		'qm/outputter/html',
+		function( array $output, QM_Collectors $collectors ) {
+			include VIP_TS_DEMO_PATH . '/classes/QM_Output_VIPRedirects.class.php';
+			$collector = QM_Collectors::get( 'vip-redirects' );
+			if ( $collector ) {
+				$output['vip-redirects'] = new QM_Output_VIPRedirects( $collector );
+			}
+			return $output;
+		},
+		50,
+		2
+	);
 }
-run_vip_ts_demo();
+
